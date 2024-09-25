@@ -1,0 +1,26 @@
+body{
+    background-color: lightcyan;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height:90vh;
+}
+.container{
+    width:500px;
+    height:250px;
+    border:1px solid black;
+    text-align: center;
+    line-height:2.5em;
+    border-radius: 5%;
+    background-color: rgb(90, 200, 237);
+}
+#btn{
+    border: none;
+    background-color: lightcoral;
+    color:white;
+    padding: 10px;
+    border-radius:5px;
+}
+input{
+    width:50%;
+}
