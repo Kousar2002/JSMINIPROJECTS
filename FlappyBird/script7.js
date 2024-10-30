@@ -35,6 +35,9 @@ let score = 0;
 let pipeInterval; // Variable for pipe generation interval
 let gameStarted = false; // To track if the game has started
 
+// Sound effect for game over
+let gameOverSound;
+
 window.onload = function () {
     board = document.getElementById("board");
     boardWidth = board.offsetWidth; 
@@ -63,6 +66,9 @@ window.onload = function () {
     bottomPipeImg = new Image();
     bottomPipeImg.src = "./bottompipe.png"; // Ensure the image path is correct
 
+    // Load game-over sound
+    gameOverSound = new Audio("./gameover.mp3"); // Make sure this path is correct
+
     // Start the game loop
     requestAnimationFrame(update);
     
@@ -86,12 +92,12 @@ function update() {
 
     // Check if bird touches the bottom of the viewport
     if (bird.y + bird.height > board.height) {
-        gameOver = true;
+        endGame();
     }
 
     // Check if bird touches the top of the viewport
     if (bird.y <= 0) {
-        gameOver = true;
+        endGame();
     }
 
     // Pipes
@@ -107,7 +113,7 @@ function update() {
             }
 
             if (detectCollision(bird, pipe)) {
-                gameOver = true;
+                endGame();
             }
         }
 
@@ -168,22 +174,14 @@ function moveBird(e) {
 
         if (!gameStarted) {
             gameStarted = true; // Start the game on first interaction
-            pipeInterval = setInterval(placePipes, 2000); // Start generating pipes after the game starts
+            pipeInterval = setInterval(placePipes, 2300); // Start generating pipes after the game starts
         }
 
         // Bird jump velocity
         velocityY = -6;
 
         if (gameOver) {
-            // Reset game
-            bird.y = (boardHeight - birdHeight) / 2; // Reset Y position to center
-            bird.x = birdX; // Reset X position
-            velocityY = 0; // Reset velocity
-            pipeArray = [];
-            score = 0;
-            gameOver = false;
-            clearInterval(pipeInterval); // Clear existing interval
-            pipeInterval = setInterval(placePipes, 2500); // Restart pipe generation
+            resetGame();
         }
     }
 }
@@ -193,4 +191,23 @@ function detectCollision(a, b) {
            a.x + a.width > b.x &&   
            a.y < b.y + b.height &&  
            a.y + a.height > b.y;    
+}
+
+function endGame() {
+    gameOver = true;
+    gameOverSound.play(); // Play game-over sound
+    clearInterval(pipeInterval); // Stop generating pipes
+}
+
+function resetGame() {
+    gameOverSound.pause(); // Stop the game-over sound
+    gameOverSound.currentTime = 0; // Reset sound playback position to the start
+    bird.y = (boardHeight - birdHeight) / 2; // Reset Y position to center
+    bird.x = birdX; // Reset X position
+    velocityY = 0; // Reset velocity
+    pipeArray = [];
+    score = 0;
+    gameOver = false;
+    gameStarted = false;
+    clearInterval(pipeInterval); // Clear existing interval
 }
