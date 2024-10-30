@@ -9,6 +9,7 @@ let birdHeight = 35;
 let birdX, birdY;
 let birdImg;
 
+// Bird object
 let bird = {
     x: 0,
     y: 0,
@@ -25,13 +26,14 @@ let topPipeImg;
 let bottomPipeImg;
 
 // Physics and game control
-let velocityX = -2; // pipes moving left speed
-let velocityY = 0; // bird jump speed
+let velocityX = -2; // Pipes moving left speed
+let velocityY = 0; // Bird jump speed
 let gravity = 0.4;
 
 let gameOver = false;
 let score = 0;
-let pipeInterval; // Declare a variable for the pipe generation interval
+let pipeInterval; // Variable for pipe generation interval
+let gameStarted = false; // To track if the game has started
 
 window.onload = function () {
     board = document.getElementById("board");
@@ -44,28 +46,26 @@ window.onload = function () {
 
     // Initialize bird position based on board dimensions
     birdX = boardWidth / 8;
-    birdY = boardHeight / 2;
-
+    birdY = (boardHeight - birdHeight) / 2; // Centered Y position
     bird.x = birdX;
     bird.y = birdY;
 
     // Load images
     birdImg = new Image();
-    birdImg.src = "./flappybird.png";
+    birdImg.src = "./flappybird.png"; // Ensure the image path is correct
     birdImg.onload = function () {
         context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
     };
 
     topPipeImg = new Image();
-    topPipeImg.src = "./toppipe.png";
+    topPipeImg.src = "./toppipe.png"; // Ensure the image path is correct
 
     bottomPipeImg = new Image();
-    bottomPipeImg.src = "./bottompipe.png";
+    bottomPipeImg.src = "./bottompipe.png"; // Ensure the image path is correct
 
     // Start the game loop
     requestAnimationFrame(update);
-    // Start generating pipes
-    pipeInterval = setInterval(placePipes, 1500); 
+    
     document.addEventListener("keydown", moveBird);
     document.addEventListener("mousedown", moveBird); 
     document.addEventListener("touchstart", moveBird);
@@ -78,8 +78,10 @@ function update() {
     context.clearRect(0, 0, board.width, board.height);
 
     // Bird
-    velocityY += gravity;
-    bird.y = Math.max(bird.y + velocityY, 0); // apply gravity to current bird.y, limit the bird.y to top of the canvas
+    if (gameStarted) {
+        velocityY += gravity;
+        bird.y = Math.max(bird.y + velocityY, 0); // Apply gravity to current bird.y, limit the bird.y to the top of the canvas
+    }
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
     // Check if bird touches the bottom of the viewport
@@ -93,24 +95,26 @@ function update() {
     }
 
     // Pipes
-    for (let i = 0; i < pipeArray.length; i++) {
-        let pipe = pipeArray[i];
-        pipe.x += velocityX;
-        context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+    if (gameStarted) { // Only update pipes if the game has started
+        for (let i = 0; i < pipeArray.length; i++) {
+            let pipe = pipeArray[i];
+            pipe.x += velocityX;
+            context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
 
-        if (!pipe.passed && bird.x > pipe.x + pipe.width) {
-            score += 0.5; 
-            pipe.passed = true;
+            if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+                score += 0.5; 
+                pipe.passed = true;
+            }
+
+            if (detectCollision(bird, pipe)) {
+                gameOver = true;
+            }
         }
 
-        if (detectCollision(bird, pipe)) {
-            gameOver = true;
+        // Clear pipes
+        while (pipeArray.length > 0 && pipeArray[0].x < -pipeWidth) {
+            pipeArray.shift();
         }
-    }
-
-    // Clear pipes
-    while (pipeArray.length > 0 && pipeArray[0].x < -pipeWidth) {
-        pipeArray.shift();
     }
 
     // Score
@@ -126,11 +130,11 @@ function update() {
 }
 
 function placePipes() {
-    if (gameOver) return;
+    if (gameOver || !gameStarted) return; // Only generate pipes if the game is active and started
 
     let openingSpace = board.height / 4; // The gap between top and bottom pipes for bird passage
     let maxPipeHeight = board.height - openingSpace - 50; // Maximum height for top pipe
-    let randomTopHeight = Math.random() * (maxPipeHeight - 50) + 50; // Ensures the top pipe height is between 50 and maxPipeHeight
+    let randomTopHeight = Math.random() * (maxPipeHeight - 50) + 50; // Ensure top pipe height is between 50 and maxPipeHeight
 
     // Create the top pipe with a random height
     let topPipe = {
@@ -162,15 +166,23 @@ function moveBird(e) {
     if ((e.type === "keydown" && (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyX")) ||
         e.type === "mousedown" || e.type === "touchstart") {
 
+        if (!gameStarted) {
+            gameStarted = true; // Start the game on first interaction
+            pipeInterval = setInterval(placePipes, 2000); // Start generating pipes after the game starts
+        }
+
         // Bird jump velocity
         velocityY = -6;
 
         if (gameOver) {
             // Reset game
-            bird.y = birdY;
+            bird.y = (boardHeight - birdHeight) / 2; // Reset Y position to center
+            bird.x = birdX; // Reset X position
+            velocityY = 0; // Reset velocity
             pipeArray = [];
             score = 0;
             gameOver = false;
+            clearInterval(pipeInterval); // Clear existing interval
             pipeInterval = setInterval(placePipes, 2500); // Restart pipe generation
         }
     }
