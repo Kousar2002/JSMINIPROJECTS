@@ -1,0 +1,70 @@
+/* body {
+    font-family:'Courier New', Courier, monospace;
+    text-align: center;
+}
+
+#board {
+    /* background-color: skyblue; 
+    background-image: url("./flappybirdbg3.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width:98vw;
+    height: 96vh;
+
+} */
+body {
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+}
+
+#board {
+    background-image: url("./flappybirdbg3.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 98vw;
+    height: 96vh;
+}
+
+/* Media Queries */
+
+/* Large screens (e.g., desktops) */
+/* @media (min-width: 1200px) {
+    #board {
+        width: 90vw;
+        height: 90vh;
+    }
+} */
+
+/* Medium screens (e.g., tablets in landscape mode) */
+@media (max-width: 1199px) and (min-width: 768px) {
+    #board {
+        width: 95vw;
+        height: 90vh;
+    }
+    body {
+        font-size: 1rem;
+    }
+}
+
+/* Small screens (e.g., tablets in portrait mode) */
+@media (max-width: 767px) {
+    #board {
+        width: 100vw;
+        height: 85vh;
+    }
+    body {
+        font-size: 0.9rem;
+    }
+}
+
+/* Extra-small screens (e.g., mobile phones) */
+@media (max-width: 480px) {
+    #board {
+        width: 100vw;
+        height: 80vh;
+    }
+    body {
+        font-size: 0.8rem;
+    }
+}
+
